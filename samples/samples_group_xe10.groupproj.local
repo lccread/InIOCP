@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.bdsproj,E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\samples_group_d2007.bdsproj=E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\samples_group_d2007.bdsproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.bdsgroup,E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\samples_group.bdsproj=D:\My Documents\RAD Studio\Projects\ProjectGroup2.bdsgroup</Transaction>
+    <Transaction>2018-09-03 17:15:26.240,E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\samples_group_xe10.groupproj=E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\samples_group_d2007.groupproj</Transaction>
+  </Transactions>
+	<Default.Personality>
+		<Projects ActiveProject="E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\23_ProxyServer\Package\InIOCPProxyServer.dproj"/>
+	</Default.Personality>
+</BorlandProject>

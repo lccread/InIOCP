@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2016-11-23 10:03:27.940.bdsproj,D:\Administrator\Documents\RAD Studio\Projects\Package1.bdsproj=E:\ProgCodes\Delphi\FileManager\Package\dvclInIOCP.bdsproj</Transaction>
+    <Transaction>2016-11-23 10:04:47.210.bdsproj,E:\ProgCodes\Delphi\FileManager\Package\dvclInIOCP.bdsproj=E:\ProgCodes\Delphi\FileManager\Package\dvlInIOCP.bdsproj</Transaction>
+    <Transaction>2016-11-23 11:23:34.427.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.clientMgr.pas=</Transaction>
+    <Transaction>2016-11-23 11:23:36.439.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.server.pas=</Transaction>
+    <Transaction>2017-02-08 18:39:40.171.pas,E:\ProgCodes\Delphi\FileManager\Package\Unit1.pas=E:\ProgCodes\Delphi\FileManager\Unit\iocp.client.pas</Transaction>
+    <Transaction>2017-03-03 08:12:22.250.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.client.pas=</Transaction>
+    <Transaction>2017-06-08 08:13:56.019.bdsproj,E:\ProgCodes\Delphi\InIOCP\v1.00\Package\D2007\dvlInIOCP.bdsproj=E:\ProgCodes\Delphi\InIOCP\v1.00\Package\D2007\dclInIOCP.bdsproj</Transaction>
+    <Transaction>2017-06-24 02:49:05.875.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Package\D2007\Unit1.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.worker.pas</Transaction>
+    <Transaction>2017-06-24 02:53:49.187.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.worker.pas=</Transaction>
+    <Transaction>2017-06-24 03:00:46.828.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Package\D2007\Unit1.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.callevent.pas</Transaction>
+    <Transaction>2017-06-24 03:02:05.031.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.callevent.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.reqEvent.pas</Transaction>
+    <Transaction>2017-06-24 03:03:06.734.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.reqEvent.pas=</Transaction>
+    <Transaction>2018-04-07 19:37:47.765.pas,E:\ProgCodes\Delphi\InIOCP\InIOCP\InIOCP\source\iocp_senders.pas=</Transaction>
+  </Transactions>
+</BorlandProject>

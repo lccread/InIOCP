@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.clientMgr.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.worker.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.658,=dclInIOCP.dcp</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.reqEvent.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.601,E:\ProgCodes\Delphi\InIOCP\InIOCP\InIOCP\package\dclInIOCP.dproj=E:\ProgCodes\Delphi\InIOCP\InIOCP\InIOCP\package\dclInIOCP_XE10.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.bdsproj,E:\ProgCodes\Delphi\FileManager\Package\dvclInIOCP.bdsproj=E:\ProgCodes\Delphi\FileManager\Package\dvlInIOCP.bdsproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.bdsproj,E:\ProgCodes\Delphi\InIOCP\v1.00\Package\D2007\dvlInIOCP.bdsproj=E:\ProgCodes\Delphi\InIOCP\v1.00\Package\D2007\dclInIOCP.bdsproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.bdsproj,D:\Administrator\Documents\RAD Studio\Projects\Package1.bdsproj=E:\ProgCodes\Delphi\FileManager\Package\dvclInIOCP.bdsproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.callevent.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.reqEvent.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.server.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.client.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Package\Unit1.pas=E:\ProgCodes\Delphi\FileManager\Unit\iocp.client.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.564,E:\ProgCodes\Delphi\InIOCP\InIOCP\InIOCP\source\iocp_reg.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.936,=E:\ProgCodes\Delphi\InIOCP\InIOCP\InIOCP\source\iocp_reg.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Package\D2007\Unit1.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.callevent.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Package\D2007\Unit1.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.worker.pas</Transaction>
+  </Transactions>
+</BorlandProject>

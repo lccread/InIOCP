@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.313,=E:\ProgCodes\Delphi\InIOCP\v2.0\Form\frmInSQLMgrEditor.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.862,E:\ProgCodes\Delphi\InIOCP\v2.0\Form\frmInSQLMgrEditor.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.server.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.bdsproj,E:\ProgCodes\Delphi\FileManager\Package\dvlInIOCP.bdsproj=E:\ProgCodes\Delphi\FileManager\Package\dvclInIOCP.bdsproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.clientMgr.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.reqEvent.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.callevent.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.reqEvent.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.client.pas=</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\FileManager\Unit\iocp.client.pas=E:\ProgCodes\Delphi\FileManager\Package\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.bdsproj,E:\ProgCodes\Delphi\FileManager\Package\dvclInIOCP.bdsproj=D:\Administrator\Documents\RAD Studio\Projects\Package1.bdsproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.worker.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Package\D2007\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.bdsproj,E:\ProgCodes\Delphi\InIOCP\v1.00\Package\D2007\dclInIOCP.bdsproj=E:\ProgCodes\Delphi\InIOCP\v1.00\Package\D2007\dvlInIOCP.bdsproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.callevent.pas=E:\ProgCodes\Delphi\InIOCP\v0.95\Package\D2007\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.pas,E:\ProgCodes\Delphi\InIOCP\v0.95\Unit\iocp.worker.pas=</Transaction>
+  </Transactions>
+</BorlandProject>
