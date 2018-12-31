@@ -127,6 +127,10 @@ const
   HTTP_INVALID_SESSION = AnsiString('INVALID_SESSION');
   HTTP_SESSION_ID_LEN  = 32;
 
+  // http/1.1 代理响应
+  HTTP_PROXY_RESPONE = 'HTTP/1.1 200 Connection Established'#13#10'' +
+                       'Proxy-agent: ' + HTTP_SERVER_NAME + #13#10#13#10;
+
   // 实体长度限制 20m
   MAX_CONTENT_LENGTH  = 20480000;
 

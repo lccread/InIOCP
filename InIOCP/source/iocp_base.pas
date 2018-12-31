@@ -63,7 +63,6 @@ type
     Overlapped: TOverlapped;  // 必须放在第一位置
     Data: TWsaBuf;            // 缓存大小、地址
     IOType: TIODataType;      // 用途分类
-    RefCount: Integer;        // 引用（锁）
     Owner: TObject;           // 宿主：TBaseSocket
     Node: PLinkRec;           // 保存对应的 PLinkRec，方便回收
   end;

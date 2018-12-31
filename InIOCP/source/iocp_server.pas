@@ -51,12 +51,14 @@ type
     function GetClientPoolSize: Integer;     // 预设客户端数量
     function GetMaxPushCount: Integer;       // 运行每秒最大推送数
     function GetMaxQueueCount: Integer;      // 允许的最大队列任务数
+    function GetMaxIOTraffic: Integer;         // 最大流量
     function GetPreventAttack: Boolean;      // 防攻击
     function GetTimeOut: Cardinal;           // 设置超时间隔
     procedure SetBusyRefuseService(const Value: Boolean);
     procedure SetClientPoolSize(const Value: Integer);
     procedure SetMaxPushCount(const Value: Integer);
     procedure SetMaxQueueCount(const Value: Integer);
+    procedure SetMaxIOTraffic(const Value: Integer);
     procedure SetPreventAttack(const Value: Boolean);
     procedure SetTimeOut(const Value: Cardinal);
   public
@@ -66,6 +68,7 @@ type
     property ClientPoolSize: Integer read GetClientPoolSize write SetClientPoolSize default 0;
     property MaxPushCount: Integer read GetMaxPushCount write SetMaxPushCount default 10000;
     property MaxQueueCount: Integer read GetMaxQueueCount write SetMaxQueueCount default 0;
+    property MaxIOTraffic: Integer read GetMaxIOTraffic write SetMaxIOTraffic default 0;
     property PreventAttack: Boolean read GetPreventAttack write SetPreventAttack default False;
     property TimeOut: Cardinal read GetTimeOut write SetTimeOut default TIME_OUT_INTERVAL;
   end;
@@ -146,6 +149,7 @@ type
     FIOCPManagers: TIOCPManagers;        // 管理器属性组
     FMaxQueueCount: Integer;             // 允许的最大队列任务数
     FMaxPushCount: Integer;              // 允许每秒最大推送消息数
+    FMaxIOTraffic: Integer;              // 允许每秒最大流量
 
     FPeerIPList: TPreventAttack;         // 接入的 IP 列表
     FPreventAttack: Boolean;             // 防攻击
@@ -228,6 +232,7 @@ type
     property BusiWorkMgr: TBusiWorkManager read FBusiWorkMgr;
     property GlobalLock: TThreadLock read FGlobalLock;
     property IOCPEngine: TIOCPEngine read FIOCPEngine;
+    property MaxIOTraffic: Integer read FMaxIOTraffic;    
     property PushManager: TPushMsgManager read FPushManager;
     property PushThreadCount: Integer read FPushThreadCount;
     property StreamServer: Boolean read FStreamServer;
@@ -247,8 +252,8 @@ type
     property MessageManager: TInMessageManager read FMessageMgr;
   published
     property Active: Boolean read FActive write SetActive default False;
-    property IOCPBroker: TInIOCPBroker read FIOCPBroker write SetIOCPBroker;
     property HttpDataProvider: TInHttpDataProvider read FHttpDataProvider write SetHttpDataProvider;
+    property IOCPBroker: TInIOCPBroker read FIOCPBroker write SetIOCPBroker;
     property IOCPManagers: TIOCPManagers read FIOCPManagers write FIOCPManagers;
     property ServerAddr: String read FServerAddr write FServerAddr;
     property ServerPort: Word read FServerPort write FServerPort default DEFAULT_SVC_PORT;
@@ -448,6 +453,11 @@ begin
   Result := FOwner.FMaxQueueCount;
 end;
 
+function TServerParams.GetMaxIOTraffic: Integer;
+begin
+  Result := FOwner.FMaxIOTraffic;
+end;
+
 function TServerParams.GetPreventAttack: Boolean;
 begin
   Result := FOwner.FPreventAttack;
@@ -481,6 +491,11 @@ end;
 procedure TServerParams.SetMaxQueueCount(const Value: Integer);
 begin
   FOwner.FMaxQueueCount := Value;
+end;
+
+procedure TServerParams.SetMaxIOTraffic(const Value: Integer);
+begin
+  FOwner.FMaxIOTraffic := Value;
 end;
 
 procedure TServerParams.SetPreventAttack(const Value: Boolean);
@@ -1599,12 +1614,10 @@ begin
         FSocket.TryClose;
       end;
     IODATA_STATE_RECV:  // 2. 收到数据，加锁使用
-      if (Windows.InterlockedIncrement(FPerIOData^.RefCount) = 1) then
-        FServer.FBusiWorkMgr.AddWork(FSocket); // 加入业务线程列表
+      FServer.FBusiWorkMgr.AddWork(FSocket); // 加入业务线程列表
     {$IFDEF TRANSMIT_FILE}
     IODATA_STATE_TRANS: // 3. TransmitFile 发送完毕，释放数据源
-      if (Windows.InterlockedIncrement(FPerIOData^.RefCount) = 1) then
-        FSocket.FreeTransmitRes;
+      FSocket.FreeTransmitRes;
     {$ENDIF}
   end;
 

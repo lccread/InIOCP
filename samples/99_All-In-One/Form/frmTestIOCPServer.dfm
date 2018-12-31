@@ -16,7 +16,7 @@ object FormTestIOCPServer: TFormTestIOCPServer
   OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  PixelsPerInch = 120
+  PixelsPerInch = 96
   TextHeight = 12
   object bvl2: TBevel
     Left = 719
@@ -363,7 +363,7 @@ object FormTestIOCPServer: TFormTestIOCPServer
         Left = 0
         Top = 0
         Width = 574
-        Height = 191
+        Height = 192
         Align = alClient
         ImeName = #35895#27468#25340#38899#36755#20837#27861' 2'
         Lines.Strings = (
@@ -379,7 +379,7 @@ object FormTestIOCPServer: TFormTestIOCPServer
         Left = 0
         Top = 0
         Width = 574
-        Height = 191
+        Height = 192
         Align = alClient
         DataSource = DataSource1
         ImeName = #35895#27468#25340#38899#36755#20837#27861' 2'
@@ -715,41 +715,34 @@ object FormTestIOCPServer: TFormTestIOCPServer
       ExplicitHeight = 15
     end
   end
-  object Button2: TButton
+  object btnWSConnect: TButton
     Left = 856
     Top = 53
     Width = 98
     Height = 30
-    Caption = 'WS Connect'
+    Caption = 'WSConnect'
     TabOrder = 34
-    OnClick = Button2Click
+    OnClick = btnWSConnectClick
   end
-  object Button3: TButton
+  object btnWSSendFiles: TButton
     Left = 856
-    Top = 89
-    Width = 98
-    Height = 30
-    Caption = 'WS Disconnect'
-    TabOrder = 35
-    OnClick = Button3Click
-  end
-  object Button4: TButton
-    Left = 856
-    Top = 131
+    Top = 98
     Width = 98
     Height = 30
     Caption = 'WS Send'
-    TabOrder = 36
-    OnClick = Button4Click
+    Enabled = False
+    TabOrder = 35
+    OnClick = btnWSSendFilesClick
   end
-  object Button5: TButton
+  object btnWSListFiles: TButton
     Left = 856
-    Top = 168
+    Top = 135
     Width = 98
     Height = 31
     Caption = #26597#35810#25991#20214
-    TabOrder = 37
-    OnClick = Button5Click
+    Enabled = False
+    TabOrder = 36
+    OnClick = btnWSListFilesClick
   end
   object InIOCPServer1: TInIOCPServer
     HttpDataProvider = InHttpDataProvider1
@@ -970,10 +963,16 @@ object FormTestIOCPServer: TFormTestIOCPServer
     Masking = True
     ServerAddr = 'localhost'
     ServerPort = 80
+    AfterConnect = InWSConnection1AfterConnect
+    AfterDisconnect = InWSConnection1AfterConnect
     OnReceiveData = InWSConnection1ReceiveData
     OnReceiveMsg = InWSConnection1ReceiveMsg
     OnReturnResult = InWSConnection1ReturnResult
     Left = 520
-    Top = 304
+    Top = 296
+  end
+  object InIOCPBroker1: TInIOCPBroker
+    Left = 560
+    Top = 160
   end
 end

@@ -26,6 +26,8 @@ type
     procedure InIOCPServer1AfterOpen(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure InIOCPBroker1Accept(Sender: TSocketBroker; const Host: string;
+      Port: Integer; var Accept: Boolean);
   private
     { Private declarations }
     FAppDir: String;
@@ -84,18 +86,25 @@ begin
     Edit1.Text := ReadString('Options', 'LocalHost', '127.0.0.1');
     EditPort.Text := ReadString('Options', 'LocalPort', '80');
 
-    if (ReadString('Options', 'Protocol', 'HTTP') = 'HTTP') then
+    if (ReadString('Options', 'Protocol', 'HTTP') = 'HTTP') then  // HTTP 协议
       InIOCPBroker1.Protocol := tpHTTP // 内网可以多主机
-    else
+    else begin
+      // 未定协议，设置内部默认主机
       InIOCPBroker1.Protocol := tpNone;
-
-    // 内部的默认主机
-    InIOCPBroker1.InnerServer.ServerAddr := ReadString('Options', 'InnerServerAddr', '127.0.0.1');
-    InIOCPBroker1.InnerServer.ServerPort := ReadInteger('Options', 'InnerServerPort', 1200);
+      InIOCPBroker1.InnerServer.ServerAddr := ReadString('Options', 'InnerServerAddr', '127.0.0.1');
+      InIOCPBroker1.InnerServer.ServerPort := ReadInteger('Options', 'InnerServerPort', 1200);
+    end;
 
     Free;
   end;
 
+end;
+
+procedure TFormInIOCPProxySvr.InIOCPBroker1Accept(Sender: TSocketBroker;
+  const Host: string; Port: Integer; var Accept: Boolean);
+begin
+  // 版本：2.5.30.1221 增加，判断是否允许连接到 Host 的 Port 端口
+  // 默认 Accept := True，Accept := False 不允许
 end;
 
 procedure TFormInIOCPProxySvr.InIOCPBroker1Bind(Sender: TSocketBroker;

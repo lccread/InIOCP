@@ -7,5 +7,6 @@
     <Transaction>2018-08-10 19:40:29.852.bdsproj,E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\23_ProxyServer\Package\InIOCPBroker.bdsproj=E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\23_ProxyServer\Package\InIOCPProxyServer.bdsproj</Transaction>
     <Transaction>2018-08-10 19:42:14.275.pas,E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\23_ProxyServer\Form\frmIOCPBroker.pas=E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\23_ProxyServer\Form\frmIOCPProxyServer.pas</Transaction>
     <Transaction>2018-08-10 19:42:14.275.dfm,E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\23_ProxyServer\Form\frmIOCPBroker.dfm=E:\ProgCodes\Delphi\InIOCP\InIOCP\samples\23_ProxyServer\Form\frmIOCPProxyServer.dfm</Transaction>
+    <Transaction>2018-12-29 20:36:01.687.pas,E:\ProgCodes\Delphi\InIOCP\pk\IdProxy\IdHTTPProxyServer.pas=</Transaction>
   </Transactions>
 </BorlandProject>

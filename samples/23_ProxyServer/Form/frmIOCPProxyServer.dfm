@@ -15,7 +15,7 @@ object FormInIOCPProxySvr: TFormInIOCPProxySvr
   Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 120
+  PixelsPerInch = 96
   TextHeight = 15
   object Label1: TLabel
     Left = 167
@@ -67,7 +67,7 @@ object FormInIOCPProxySvr: TFormInIOCPProxySvr
     Lines.Strings = (
       'InIOCP'#20195#29702#26381#21153#65281
       #35774#32622' TInIOCPServer '#30340' IOCPBroker '#32452#20214#21363#21487#65288#27492#26102#20854#20182#31649#29702#32452#20214#26080#25928#65289#65307
-      'InIOCPBroker.ProxyType = ptDefault '#19988' ReverseProxy.ServerAddr '#20026#31354#26102
+      'InIOCPBroker.ProxyType = ptDefault '#19988' OuterProxy.ServerAddr '#20026#31354#26102
       #26159#26222#36890#20195#29702#65292#35201#37096#32626#20110#29992#25143#33021#30452#25509#35775#38382#24471#21040#30340#22320#26041#12290)
     TabOrder = 2
   end
@@ -361,10 +361,12 @@ object FormInIOCPProxySvr: TFormInIOCPProxySvr
     Text = '80'
   end
   object InIOCPBroker1: TInIOCPBroker
+    Protocol = tpHTTP
     InnerServer.ServerAddr = '127.0.0.1'
     InnerServer.ServerPort = 900
+    OnAccept = InIOCPBroker1Accept
     OnBind = InIOCPBroker1Bind
-    Left = 320
+    Left = 312
     Top = 88
   end
   object InIOCPServer1: TInIOCPServer

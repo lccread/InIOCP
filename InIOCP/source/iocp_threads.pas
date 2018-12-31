@@ -323,6 +323,7 @@ begin
   // 2. 激活业务线程，让其取任务
   if Activate and (FCurrentList = FSockets) then  // 是主列表
     ReleaseSemapHore(FSemaphore, 8, Nil);
+
 end;
 
 constructor TBusiWorkManager.Create(AServer: TObject; AThreadCount: Integer);

@@ -298,7 +298,7 @@ type
     property RootDirectory: String read FRootDirectory write FRootDirectory;
     property WebSocketManager: TInWebSocketManager read FWebSocketManager write FWebSocketManager;
   published
-    property OnConnect: THttpRequestEvent read FOnConnect write FOnConnect;
+//    property OnConnect: THttpRequestEvent read FOnConnect write FOnConnect; // 删除，用代理实现
     property OnDelete: THttpRequestEvent read FOnDelete write FOnDelete;
     property OnGet: THttpRequestEvent read FOnGet write FOnGet;
     property OnPost: THttpRequestEvent read FOnPost write FOnPost;
@@ -365,7 +365,8 @@ type
     FConnectionCount: Integer;      // 预投放的连接数
     FCreateCount: Integer;          // 补充连接数
     FThread: TPostSocketThread;     // 投放线程
-    
+
+    FOnAccept: TAcceptBroker;       // 判断是否接受连接
     FOnBind: TBindIPEvent;          // 绑定服务器
 
     function GetReverseMode: Boolean;
@@ -374,7 +375,7 @@ type
     procedure InterConnectOuter(ACount: Integer);
   protected
     procedure AddConnection(Broker: TSocketBroker; const InnerId: String);
-    procedure BindBroker(Connection: TSocketBroker; const Data: PAnsiChar; DataSize: Cardinal);
+    procedure BindInnerBroker(Connection: TSocketBroker; const Data: PAnsiChar; DataSize: Cardinal);
     procedure ConnectOuter;
   public
     constructor Create(AOwner: TComponent); override;
@@ -394,6 +395,7 @@ type
     property OuterServer: TProxyOptions read FOuterServer write FOuterServer;
     property ProxyType: TProxyType read FProxyType write FProxyType default ptDefault;
   published
+    property OnAccept: TAcceptBroker read FOnAccept write FOnAccept;
     property OnBind: TBindIPEvent read FOnBind write FOnBind;
   end;
 
@@ -1634,9 +1636,8 @@ var
   RecreateSockets: Boolean;
   oSocket: TSocketBroker;
 begin
-  // 建 Ping 套接字，成功后预设连接
-  // 开始或外部代理关闭时执行
-  
+  // 建反向连接
+
   while (Terminated = False) do
   begin
     // 是否要重新建
@@ -1757,7 +1758,7 @@ begin
   end;
 end;
 
-procedure TInIOCPBroker.BindBroker(Connection: TSocketBroker;
+procedure TInIOCPBroker.BindInnerBroker(Connection: TSocketBroker;
   const Data: PAnsiChar; DataSize: Cardinal);
 var
   i, k: Integer;
@@ -1854,7 +1855,7 @@ end;
 
 procedure TInIOCPBroker.PostConnections;
 begin
-  // 用线程连接
+  // 用线程建连接
   if not Assigned(FThread) then
   begin
     if (FConnectionCount < 2) then

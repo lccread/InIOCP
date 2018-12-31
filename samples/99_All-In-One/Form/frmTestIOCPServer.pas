@@ -91,10 +91,10 @@ type
     FrameIOCPSvrInfo1: TFrameIOCPSvrInfo;
     InWebSocketManager1: TInWebSocketManager;
     InWSConnection1: TInWSConnection;
-    Button2: TButton;
-    Button3: TButton;
-    Button4: TButton;
-    Button5: TButton;
+    btnWSConnect: TButton;
+    btnWSSendFiles: TButton;
+    btnWSListFiles: TButton;
+    InIOCPBroker1: TInIOCPBroker;
     procedure btnStartClick(Sender: TObject);
     procedure btnStopClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -237,13 +237,13 @@ type
     procedure InWebSocketManager1Upgrade(Sender: TObject; const Origin: string;
       var Accept: Boolean);
     procedure InWebSocketManager1Receive(Sender: TObject; Socket: TWebSocket);
-    procedure Button2Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
-    procedure Button4Click(Sender: TObject);
+    procedure btnWSConnectClick(Sender: TObject);
+    procedure btnWSSendFilesClick(Sender: TObject);
     procedure InWSConnection1ReceiveMsg(Sender: TObject; Msg: TJSONResult);
     procedure InWSConnection1ReceiveData(Sender: TObject; const Msg: string);
     procedure InWSConnection1ReturnResult(Sender: TObject; Result: TJSONResult);
-    procedure Button5Click(Sender: TObject);
+    procedure btnWSListFilesClick(Sender: TObject);
+    procedure InWSConnection1AfterConnect(Sender: TObject);
   private
     { Private declarations }
     FAppDir: String;
@@ -457,18 +457,13 @@ begin
 
 end;
 
-procedure TFormTestIOCPServer.Button2Click(Sender: TObject);
+procedure TFormTestIOCPServer.btnWSConnectClick(Sender: TObject);
 begin
   InWSConnection1.ServerPort := StrToInt(edtPort.Text);
   InWSConnection1.Active := True;
 end;
 
-procedure TFormTestIOCPServer.Button3Click(Sender: TObject);
-begin
-  InWSConnection1.Active := False;
-end;
-
-procedure TFormTestIOCPServer.Button4Click(Sender: TObject);
+procedure TFormTestIOCPServer.btnWSSendFilesClick(Sender: TObject);
 var
   JSON: TJSONMessage;
 begin
@@ -495,7 +490,7 @@ begin
 
 end;
 
-procedure TFormTestIOCPServer.Button5Click(Sender: TObject);
+procedure TFormTestIOCPServer.btnWSListFilesClick(Sender: TObject);
 begin
   // 先查询服务端 Form 下的文件
   // InIOCP-JSON 支持记录对象 R[]，每文件当中一条记录，
@@ -1880,6 +1875,21 @@ procedure TFormTestIOCPServer.InWebSocketManager1Upgrade(Sender: TObject;
 begin
   // 在此判断是否允许来自 Origin 的 Socket 升级为 WebSocket
   Accept := Length(Origin) > 0;
+end;
+
+procedure TFormTestIOCPServer.InWSConnection1AfterConnect(Sender: TObject);
+begin
+  if InWSConnection1.Active then
+  begin
+    btnWSConnect.Caption := 'WSDisconnect';
+    btnWSSendFiles.Enabled := True;
+    btnWSListFiles.Enabled := True;
+  end else
+  begin
+    btnWSConnect.Caption := 'WSConnect';
+    btnWSSendFiles.Enabled := False;
+    btnWSListFiles.Enabled := False;    
+  end;
 end;
 
 procedure TFormTestIOCPServer.InWSConnection1ReceiveData(Sender: TObject; const Msg: string);

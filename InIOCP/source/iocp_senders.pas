@@ -470,7 +470,6 @@ begin
 
   FSendBuf^.Owner := FOwner;  // 宿主
   FSendBuf^.IOType := ioTransmit;  // iocp_server 中判断用
-  FSendBuf^.RefCount := 0;    // 清引用
 
   // 设置位移（用 LARGE_INTEGER 确定位移）
   if (FTask.Handle > 0) then

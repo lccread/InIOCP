@@ -63,6 +63,7 @@ type
     FSendThread: TSendThread;  // 发送线程
     FRecvThread: TRecvThread;  // 接收线程
     FPostThread: TPostThread;  // 投放线程
+//    FCurrentThread: TThread;
 
     FRecvCount: Cardinal;      // 共收到
     FSendCount: Cardinal;      // 共发送
@@ -1828,6 +1829,7 @@ begin
 
   FLock.Acquire;
   try
+//    FConnection.FCurrentThread := TThread.CurrentThread;
     ClearCancelMsgId(Msg.FMsgId);  // 清除数组内的 MsgId
     FMsgList.Add(Msg);
   finally
@@ -2347,7 +2349,7 @@ begin
       end;
     end;
   finally
-    if DoSynch then
+    if DoSynch then  // FConnection.FCurrentThread,
       Synchronize(ExecInMainThread) // 进入应用层
     else
       FConnection.FSendThread.ServerReturn; // 唤醒

@@ -15,7 +15,7 @@ object FormInIOCPRecvProxySvr: TFormInIOCPRecvProxySvr
   Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
-  PixelsPerInch = 120
+  PixelsPerInch = 96
   TextHeight = 15
   object Label1: TLabel
     Left = 190
@@ -54,8 +54,8 @@ object FormInIOCPRecvProxySvr: TFormInIOCPRecvProxySvr
       ''
       #35774#32622' TInIOCPServer '#30340' IOCPBroker '#32452#20214#21363#21487#65288#27492#26102#20854#20182#31649#29702#32452#20214#26080#25928#65289#12290
       
-        'InIOCPBroker1 '#30340' ProxyType = ptDefault '#19988' ReverseProxy.ServerAddr ' +
-        #19981#20026#31354#26102
+        'InIOCPBroker1 '#30340' ProxyType = ptDefault '#19988' OuterProxy.ServerAddr '#19981#20026 +
+        #31354#26102
       #26159#21453#21521#20195#29702#65292#35201#37096#32626#20110#33021#35775#38382#22806#37096#20195#29702#26381#21153#22120#30340#22320#26041#12290)
     TabOrder = 2
   end

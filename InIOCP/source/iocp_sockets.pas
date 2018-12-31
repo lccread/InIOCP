@@ -88,54 +88,6 @@ type
     property ThreadIdx: Integer read FThreadIdx;
   end;
 
-  // ================== 服务端接收到的数据 ======================
-
-  TReceiveParams = class(TReceivePack)
-  private
-    FMsgHead: PMsgHead;      // 协议头位置 
-    FSocket: TIOCPSocket;    // 宿主
-  public
-    constructor Create(AOwner: TIOCPSocket);
-    function GetData: Variant; override;
-    function ToJSON: AnsiString; override;
-    procedure CreateAttachment(const LocalPath: string); override;
-  public
-    property Socket: TIOCPSocket read FSocket;
-    property AttachPath: string read GetAttachPath;
-  end;
-
-  // ================== 反馈给客户端的数据 ======================
-
-  TReturnResult = class(TBaseMessage)
-  private
-    FSocket: TIOCPSocket;     // 宿主
-    FSender: TBaseTaskSender; // 任务发送器
-    procedure ReturnHead(AActResult: TActionResult = arOK);
-    procedure ReturnResult;
-  public
-    constructor Create(AOwner: TIOCPSocket); reintroduce;
-    procedure LoadFromFile(const AFileName: String; OpenAtOnce: Boolean = False); override;
-    procedure LoadFromVariant(AData: Variant); override;
-  public
-    property ErrMsg: String read GetErrMsg write SetErrMsg;
-    property Socket: TIOCPSocket read FSocket;
-  public
-    // 公开协议头属性
-    property Action: TActionType read FAction;
-    property ActResult: TActionResult read FActResult write FActResult;
-    property AttachSize: TFileSize read FAttachSize;    
-    property CheckType: TDataCheckType read FCheckType;
-    property DataSize: Cardinal read FDataSize;
-    property MsgId: TIOCPMsgId read FMsgId;
-    property Offset: TFileSize read FOffset;
-    property OffsetEnd: TFileSize read FOffsetEnd;
-    property Owner: TMessageOwner read FOwner;
-    property SessionId: Cardinal read FSessionId;
-    property Target: TActionTarget read FTarget;
-    property VarCount: Cardinal read FVarCount;
-    property ZipLevel: TZipLevel read FZipLevel;
-  end;
-
   // ================== Socket 基类 ======================
   // FState 状态：
   // 1. 空闲 = 0，关闭 = 9
@@ -229,7 +181,7 @@ type
 
   TBaseSocketClass = class of TBaseSocket;
 
-  // ================== TStreamSocket 原始数据流 ==================
+  // ================== 原始数据流 Socket ==================
 
   TStreamSocket = class(TBaseSocket)
   protected
@@ -247,66 +199,55 @@ type
     procedure SendDataVar(Data: Variant); virtual; 
   end;
 
-  // ================== 服务端 WebSocket 类 ==================
-
-  TResultJSON = class(TSendJSON)
-  public
-    property DataSet;
-  end;
-  
-  TWebSocket = class(TStreamSocket)
-  protected
-    FReceiver: TWSServerReceiver;  // 数据接收器
-    FJSON: TBaseJSON;          // 收到的 JSON 数据
-    FResult: TResultJSON;      // 要返回的 JSON 数据
-        
-    FData: PAnsiChar;          // 本次收到的数据引用位置
-    FMsgSize: UInt64;          // 当前消息收到的累计长度
-    FFrameSize: UInt64;        // 当前帧长度
-    FFrameRecvSize: UInt64;    // 本次收到的数据长度
-
-    FMsgType: TWSMsgType;      // 数据类型
-    FOpCode: TWSOpCode;        // WebSocket 操作类型
-    FRole: TClientRole;        // 客户权限（预设）
-    FUserName: TNameString;    // 用户名称（预设）
-
-    procedure ClearMsgOwner(Buf: PAnsiChar; Len: Integer);
-    procedure InternalPing;    
-  protected
-    procedure ClearResources; override;
-    procedure ExecuteWork; override;
-    procedure InterPush(Target: TWebSocket = nil);
-    procedure SetProps(AOpCode: TWSOpCode; AMsgType: TWSMsgType;
-                       AData: Pointer; AFrameSize: Int64; ARecvSize: Cardinal);
-  public
-    constructor Create(APool: TIOCPSocketPool; ALinkNode: PLinkRec); override;
-    destructor Destroy; override;
-
-    procedure PostEvent(IOKind: TIODataType); override;
-    procedure SendData(const Data: PAnsiChar; Size: Cardinal); overload; override;
-    procedure SendData(const Msg: String); overload; override;
-    procedure SendData(Handle: THandle); overload; override;
-    procedure SendData(Stream: TStream); overload; override;
-    procedure SendDataVar(Data: Variant); override;
-
-    procedure SendResult(UTF8CharSet: Boolean = False);
-  public
-    property Data: PAnsiChar read FData;  // raw
-    property FrameRecvSize: UInt64 read FFrameRecvSize; // raw
-    property FrameSize: UInt64 read FFrameSize; // raw
-    property MsgSize: UInt64 read FMsgSize; // raw
-
-    property JSON: TBaseJSON read FJSON; // JSON
-    property Result: TResultJSON read FResult; // JSON
-  public
-    property MsgType: TWSMsgType read FMsgType; // 数据类型
-    property OpCode: TWSOpCode read FOpCode;  // WebSocket 操作
-  public
-    property Role: TClientRole read FRole write FRole;
-    property UserName: TNameString read FUserName write FUserName;
-  end;
-
   // ================== C/S 模式业务处理 ==================
+
+  // 1. 服务端接收到的数据
+
+  TReceiveParams = class(TReceivePack)
+  private
+    FMsgHead: PMsgHead;      // 协议头位置
+    FSocket: TIOCPSocket;    // 宿主
+  public
+    constructor Create(AOwner: TIOCPSocket);
+    function GetData: Variant; override;
+    function ToJSON: AnsiString; override;
+    procedure CreateAttachment(const LocalPath: string); override;
+  public
+    property Socket: TIOCPSocket read FSocket;
+    property AttachPath: string read GetAttachPath;
+  end;
+
+  // 2. 反馈给客户端的数据
+
+  TReturnResult = class(TBaseMessage)
+  private
+    FSocket: TIOCPSocket;     // 宿主
+    FSender: TBaseTaskSender; // 任务发送器
+    procedure ReturnHead(AActResult: TActionResult = arOK);
+    procedure ReturnResult;
+  public
+    constructor Create(AOwner: TIOCPSocket); reintroduce;
+    procedure LoadFromFile(const AFileName: String; OpenAtOnce: Boolean = False); override;
+    procedure LoadFromVariant(AData: Variant); override;
+  public
+    property ErrMsg: String read GetErrMsg write SetErrMsg;
+    property Socket: TIOCPSocket read FSocket;
+  public
+    // 公开协议头属性
+    property Action: TActionType read FAction;
+    property ActResult: TActionResult read FActResult write FActResult;
+    property AttachSize: TFileSize read FAttachSize;    
+    property CheckType: TDataCheckType read FCheckType;
+    property DataSize: Cardinal read FDataSize;
+    property MsgId: TIOCPMsgId read FMsgId;
+    property Offset: TFileSize read FOffset;
+    property OffsetEnd: TFileSize read FOffsetEnd;
+    property Owner: TMessageOwner read FOwner;
+    property SessionId: Cardinal read FSessionId;
+    property Target: TActionTarget read FTarget;
+    property VarCount: Cardinal read FVarCount;
+    property ZipLevel: TZipLevel read FZipLevel;
+  end;
 
   TIOCPSocket = class(TBaseSocket)
   private
@@ -347,9 +288,10 @@ type
     property SessionId: Cardinal read FSessionId;
   end;
 
-  // ================== Socket Http 处理 ==================
+  // ================== Http 协议 Socket ==================
 
   TRequestObject = class(THttpRequest);
+
   TResponeObject = class(THttpRespone);
 
   THttpSocket = class(TBaseSocket)
@@ -382,12 +324,75 @@ type
     property SessionId: AnsiString read FSessionId;
   end;
 
+  // ================== WebSocket 类 ==================
+
+  // . 待返回的 JSON 消息
+  
+  TResultJSON = class(TSendJSON)
+  public
+    property DataSet;
+  end;
+  
+  TWebSocket = class(TStreamSocket)
+  private
+    FReceiver: TWSServerReceiver;  // 数据接收器
+    FJSON: TBaseJSON;          // 收到的 JSON 数据
+    FResult: TResultJSON;      // 要返回的 JSON 数据
+    FMsgType: TWSMsgType;      // 数据类型
+    FOpCode: TWSOpCode;        // WebSocket 操作类型
+    FRole: TClientRole;        // 客户权限（预设）
+    FUserName: TNameString;    // 用户名称（预设）
+    procedure ClearMsgOwner(Buf: PAnsiChar; Len: Integer);
+    procedure InternalPing;
+  protected
+    FData: PAnsiChar;          // 本次收到的数据引用位置
+    FMsgSize: UInt64;          // 当前消息收到的累计长度
+    FFrameSize: UInt64;        // 当前帧长度
+    FFrameRecvSize: UInt64;    // 本次收到的数据长度
+    procedure InterPush(Target: TWebSocket = nil);
+    procedure SetProps(AOpCode: TWSOpCode; AMsgType: TWSMsgType;
+                       AData: Pointer; AFrameSize: Int64; ARecvSize: Cardinal);
+  protected
+    procedure ClearResources; override;
+    procedure ExecuteWork; override;
+  public
+    constructor Create(APool: TIOCPSocketPool; ALinkNode: PLinkRec); override;
+    destructor Destroy; override;
+
+    procedure PostEvent(IOKind: TIODataType); override;
+    procedure SendData(const Data: PAnsiChar; Size: Cardinal); overload; override;
+    procedure SendData(const Msg: String); overload; override;
+    procedure SendData(Handle: THandle); overload; override;
+    procedure SendData(Stream: TStream); overload; override;
+    procedure SendDataVar(Data: Variant); override;
+
+    procedure SendResult(UTF8CharSet: Boolean = False);
+  public
+    property Data: PAnsiChar read FData;  // raw
+    property FrameRecvSize: UInt64 read FFrameRecvSize; // raw
+    property FrameSize: UInt64 read FFrameSize; // raw
+    property MsgSize: UInt64 read FMsgSize; // raw
+
+    property JSON: TBaseJSON read FJSON; // JSON
+    property Result: TResultJSON read FResult; // JSON
+  public
+    property MsgType: TWSMsgType read FMsgType; // 数据类型
+    property OpCode: TWSOpCode read FOpCode;  // WebSocket 操作
+  public
+    property Role: TClientRole read FRole write FRole;
+    property UserName: TNameString read FUserName write FUserName;
+  end;
+
   // ================== TSocketBroker 代理套接字 ==================
 
   TSocketBroker = class;
 
+  TAcceptBroker = procedure(Sender: TSocketBroker; const Host: AnsiString;
+                            Port: Integer; var Accept: Boolean) of object;
+
   TBindIPEvent  = procedure(Sender: TSocketBroker; const Data: PAnsiChar;
                             DataSize: Cardinal) of object;
+                            
   TOuterPingEvent  = TBindIPEvent;
 
   TSocketBroker = class(TBaseSocket)
@@ -395,8 +400,7 @@ type
     FDual: TSocketBroker;      // 关联的中继
     FAction: Integer;          // 初始化
 
-    FContentLength: Integer;   // Http 实体总长
-    FReceiveSize: Integer;     // Http 收到的实体长度
+    FCmdConnect: Boolean;      // HTTP 代理模式
     FSocketType: TSocketBrokerType;  // 类型
 
     FTargetHost: AnsiString;   // 关联的主机地址
@@ -413,8 +417,6 @@ type
 
     // HTTP 协议
     procedure HttpBindOuter(Connection: TSocketBroker; const Data: PAnsiChar; DataSize: Cardinal);
-    procedure HttpConnectHost(const AServer: AnsiString; APort: Integer);  // 连接到 HTTP 的 Host
-    procedure HttpRequestDecode;  // Http 请求的简单解码
   protected
     FBrokerId: AnsiString;     // 所属的反向代理 Id
     procedure ClearResources; override;
@@ -596,181 +598,6 @@ begin
   Result := iocp_Winsock2.setsockopt(FSocket, SOL_SOCKET,
                  SO_UPDATE_ACCEPT_CONTEXT, PAnsiChar(@FListenSocket),
                  SizeOf(TSocket)) <> SOCKET_ERROR;
-end;
-
-{ TReceiveParams }
-
-constructor TReceiveParams.Create(AOwner: TIOCPSocket);
-begin
-  inherited Create;
-  FSocket := AOwner;
-end;
-
-procedure TReceiveParams.CreateAttachment(const LocalPath: string);
-begin
-  inherited;      
-  // 建流，接收附件
-  if Error then  // 出现错误
-    FSocket.FResult.ActResult := arFail
-  else begin
-    FSocket.FAction := atAfterReceive; // 结束时执行事件
-    FSocket.FResult.FActResult := arAccept;  // 允许上传
-
-    // 续传
-    if (FAction in FILE_CHUNK_ACTIONS) then
-    begin
-      // 加密路径，返回给客户端
-      FSocket.FResult.SetAttachPath(iocp_utils.EncryptString(LocalPath));
-
-      // 原样返回客户端的 路径+文件名...
-      FSocket.FResult.SetFileSize(GetFileSize);
-      FSocket.FResult.SetDirectory(Directory);
-      FSocket.FResult.SetFileName(FileName);
-      FSocket.FResult.SetNewCreatedFile(GetNewCreatedFile);
-    end;
-
-    FSocket.FReceiver.Complete := False;  // 恢复，接收附件
-  end;
-end;
-
-function TReceiveParams.GetData: Variant;
-begin
-  Result := inherited GetData;
-end;
-
-function TReceiveParams.ToJSON: AnsiString;
-begin
-  Result := inherited ToJSON;
-end;
-
-{ TReturnResult }
-
-constructor TReturnResult.Create(AOwner: TIOCPSocket);
-begin
-  inherited Create(nil);  // 用接收的 Owner
-  FSocket := AOwner;
-end;
-
-procedure TReturnResult.LoadFromFile(const AFileName: String; OpenAtOnce: Boolean);
-begin
-  // 立刻打开文件，等待发送
-  if (FileExists(AFileName) = False) then
-  begin
-    FActResult := arMissing;
-    FOffset := 0;
-    FOffsetEnd := 0;
-  end else
-  begin
-    inherited;
-    if (FAction = atFileDownChunk) then  // 断点下载
-    begin
-      // FParams.FOffsetEnd 转义, 是期望长度, == 客户端 FMaxChunkSize
-      FOffset := FSocket.FParams.FOffset;  // 请求位移
-      AdjustTransmitRange(FSocket.FParams.FOffsetEnd);
-      // 返回客户端文件名，本地路径（加密）给客户端
-      SetFileName(FSocket.FParams.FileName);
-      SetAttachPath(iocp_utils.EncryptString(ExtractFilePath(AFileName)));
-    end;
-    if Error then
-      FActResult := arFail
-    else
-      FActResult := arOK;
-  end;
-end;
-
-procedure TReturnResult.LoadFromVariant(AData: Variant);
-begin
-  inherited;  // 直接调用
-end;
-
-procedure TReturnResult.ReturnHead(AActResult: TActionResult);
-begin
-  // 反馈协议头给客户端（响应、其他消息）
-  //   格式：IOCP_HEAD_FLAG + TMsgHead
-
-  // 更新协议头信息
-  FDataSize := 0;
-  FAttachSize := 0;
-  FActResult := AActResult;
-
-  if (FAction = atUnknown) then  // 响应
-    FVarCount := FServer.IOCPSocketPool.UsedCount // 客户端要判断
-  else
-    FVarCount := 0;
-
-  // 直接写入 FSender 的发送缓存
-  LoadHead(FSender.Data);
-
-  // 发送（长度 = ByteCount）
-  FSender.SendBuffers;
-end;
-
-procedure TReturnResult.ReturnResult;
-  procedure SendMsgHeader;
-  begin
-    // 发送协议头（描述）
-    LoadHead(FSender.Data);
-    FSender.SendBuffers;
-  end;
-  procedure SendMainStream;
-  begin
-    // 发送主体数据流
-    {$IFDEF TRANSMIT_FILE}
-    // 设置主体数据流
-    FSocket.FTask.SetTask(FMain, FDataSize);
-    {$ELSE}
-    FSender.Send(FMain, FDataSize, False);  // 不关闭资源
-    {$ENDIF}
-  end;
-  procedure SendAttachmentStream;
-  begin
-    // 发送附件数据
-    {$IFDEF TRANSMIT_FILE}
-    // 设置附件数据流
-    if (FAction = atFileDownChunk) then
-      FSocket.FTask.SetTask(FAttachment, FAttachSize, FOffset, FOffsetEnd)
-    else
-      FSocket.FTask.SetTask(FAttachment, FAttachSize);
-    {$ELSE}
-    // 不关闭资源
-    if (FAction = atFileDownChunk) then
-      FSender.Send(FAttachment, FAttachSize, FOffset, FOffsetEnd, False)
-    else
-      FSender.Send(FAttachment, FAttachSize, False);
-    {$ENDIF}
-  end;
-begin
-  // 发送结果给客户端，不用请求，直接发送
-  //  附件流是 TIOCPDocument，还要用，不能释放
-  //   见：TIOCPSocket.HandleDataPack; TClientParams.InternalSend
-
-  // FSender.Socket、Owner 已经设置
-
-  try
-    // 1. 准备数据流
-    CreateStreams;
-
-    if (Error = False) then
-    begin
-      // 2. 发协议头
-      SendMsgHeader;
-
-      // 3. 主体数据（内存流）
-      if (FDataSize > 0) then
-        SendMainStream;
-
-      // 4. 发送附件数据
-      if (FAttachSize > 0) then
-        SendAttachmentStream;
-    end;
-  finally
-    {$IFDEF TRANSMIT_FILE}
-    FSocket.InterTransmit;
-    {$ELSE}
-    NilStreams(False);  // 5. 清空，暂不释放附件流
-    {$ENDIF}
-  end;
-
 end;
 
 { TBaseSocket }
@@ -970,7 +797,6 @@ begin
   FRecvBuf^.Owner := Self;  // 宿主
   FRecvBuf^.IOType := ioReceive;  // iocp_server 中判断用
   FRecvBuf^.Data.len := IO_BUFFER_SIZE; // 恢复
-  FRecvBuf^.RefCount := 0;  // 清引用，可以改为 FRefCount
 
   ByteCount := 0;
   Flags := 0;
@@ -1255,232 +1081,179 @@ begin
   end;
 end;
 
-{ TWebSocket }
+{ TReceiveParams }
 
-procedure TWebSocket.ClearMsgOwner(Buf: PAnsiChar; Len: Integer);
+constructor TReceiveParams.Create(AOwner: TIOCPSocket);
 begin
-  // 修改消息的宿主
-  Inc(Buf, Length(INIOCP_JSON_FLAG));
-  if SearchInBuffer(Buf, Len, '"__MSG_OWNER":') then // 区分大小写
-    while (Buf^ <> AnsiChar(',')) do
+  inherited Create;
+  FSocket := AOwner;
+end;
+
+procedure TReceiveParams.CreateAttachment(const LocalPath: string);
+begin
+  inherited;      
+  // 建流，接收附件
+  if Error then  // 出现错误
+    FSocket.FResult.ActResult := arFail
+  else begin
+    FSocket.FAction := atAfterReceive; // 结束时执行事件
+    FSocket.FResult.FActResult := arAccept;  // 允许上传
+
+    // 续传
+    if (FAction in FILE_CHUNK_ACTIONS) then
     begin
-      Buf^ := AnsiChar('0');
-      Inc(Buf);
+      // 加密路径，返回给客户端
+      FSocket.FResult.SetAttachPath(iocp_utils.EncryptString(LocalPath));
+
+      // 原样返回客户端的 路径+文件名...
+      FSocket.FResult.SetFileSize(GetFileSize);
+      FSocket.FResult.SetDirectory(Directory);
+      FSocket.FResult.SetFileName(FileName);
+      FSocket.FResult.SetNewCreatedFile(GetNewCreatedFile);
     end;
+
+    FSocket.FReceiver.Complete := False;  // 恢复，接收附件
+  end;
 end;
 
-procedure TWebSocket.ClearResources;
+function TReceiveParams.GetData: Variant;
 begin
-  if Assigned(FReceiver) then
-    FReceiver.Clear;
+  Result := inherited GetData;
 end;
 
-constructor TWebSocket.Create(APool: TIOCPSocketPool; ALinkNode: PLinkRec);
+function TReceiveParams.ToJSON: AnsiString;
 begin
-  inherited;
-  FUseTransObj := False;  // 不用 TransmitFile
-  FJSON := TBaseJSON.Create(Self);
-  FResult := TResultJSON.Create(Self);
-  FResult.FServerMode := True;  // 服务器模式
-  FReceiver := TWSServerReceiver.Create(Self, FJSON);
+  Result := inherited ToJSON;
 end;
 
-destructor TWebSocket.Destroy;
+{ TReturnResult }
+
+constructor TReturnResult.Create(AOwner: TIOCPSocket);
 begin
-  FJSON.Free;
-  FResult.Free;
-  FReceiver.Free;
-  inherited;
+  inherited Create(nil);  // 用接收的 Owner
+  FSocket := AOwner;
 end;
 
-procedure TWebSocket.ExecuteWork;
+procedure TReturnResult.LoadFromFile(const AFileName: String; OpenAtOnce: Boolean);
 begin
-  // 接收数据（与 TReceiveSocket 类似）
-
-  // 1. 接收数据
-  FTickCount := GetTickCount;
-
-  if FReceiver.Complete then  // 首数据包
+  // 立刻打开文件，等待发送
+  if (FileExists(AFileName) = False) then
   begin
-    // 分析、接收数据
-    // 可能改变 FMsgType，见 FReceiver.UnMarkData
-    FMsgType := mtDefault;
-    FReceiver.Prepare(FRecvBuf^.Data.buf, FByteCount);
-    case FReceiver.OpCode of
-      ocClose: begin
-        InterCloseSocket(Self);  // 关闭，返回
-        Exit;
-      end;
-      ocPing, ocPong: begin
-        InternalRecv(True);  // 投放，返回
-        Exit;
-      end;
-    end;
+    FActResult := arMissing;
+    FOffset := 0;
+    FOffsetEnd := 0;
   end else
   begin
-    // 接收后续数据包
-    FReceiver.Receive(FRecvBuf^.Data.buf, FByteCount);
-  end;
-
-  // 是否接收完成
-  FComplete := FReceiver.Complete;
-
-  // 2. 进入应用层
-  // 2.1 标准操作，每接收一次即进入
-  // 2.2 扩展的操作，是 JSON 消息，接收完毕才进入
-
-  try
-    if (FMsgType = mtDefault) or FComplete then
-      FWorker.WSExecute(Self);
-  finally
-    if FComplete then   // 接收完毕
+    inherited;
+    if (FAction = atFileDownChunk) then  // 断点下载
     begin
-      case FMsgType of
-        mtJSON: begin   // 扩展的 JSON
-          FJSON.Clear;  // 不清 Attachment
-          FResult.Clear;
-          FReceiver.Clear;
-        end;
-        mtAttachment: begin  // 扩展的附件流
-          FJSON.Close;  // 关闭附件流
-          FResult.Clear;
-          FReceiver.Clear;
-        end;
-      end;
-      // ping 客户端
-      InternalPing;  
+      // FParams.FOffsetEnd 转义, 是期望长度, == 客户端 FMaxChunkSize
+      FOffset := FSocket.FParams.FOffset;  // 请求位移
+      AdjustTransmitRange(FSocket.FParams.FOffsetEnd);
+      // 返回客户端文件名，本地路径（加密）给客户端
+      SetFileName(FSocket.FParams.FileName);
+      SetAttachPath(iocp_utils.EncryptString(ExtractFilePath(AFileName)));
     end;
-
-    // 继续接收
-    InternalRecv(FComplete);
+    if Error then
+      FActResult := arFail
+    else
+      FActResult := arOK;
   end;
-
 end;
 
-procedure TWebSocket.InternalPing;
+procedure TReturnResult.LoadFromVariant(AData: Variant);
 begin
-  // Ping 客户端，等新的信息缓存接收完成
-  MakeFrameHeader(FSender.Data, ocPing);
+  inherited;  // 直接调用
+end;
+
+procedure TReturnResult.ReturnHead(AActResult: TActionResult);
+begin
+  // 反馈协议头给客户端（响应、其他消息）
+  //   格式：IOCP_HEAD_FLAG + TMsgHead
+
+  // 更新协议头信息
+  FDataSize := 0;
+  FAttachSize := 0;
+  FActResult := AActResult;
+
+  if (FAction = atUnknown) then  // 响应
+    FVarCount := FServer.IOCPSocketPool.UsedCount // 客户端要判断
+  else
+    FVarCount := 0;
+
+  // 直接写入 FSender 的发送缓存
+  LoadHead(FSender.Data);
+
+  // 发送（长度 = ByteCount）
   FSender.SendBuffers;
 end;
 
-procedure TWebSocket.InterPush(Target: TWebSocket);
-var
-  Msg: TPushMessage;
-begin
-  // 发收到的消息发给 Target 或广播
-  //   提交到推送线程，不知道何时发出、是否成功。
-
-  if (FOpCode <> ocText) then
+procedure TReturnResult.ReturnResult;
+  procedure SendMsgHeader;
   begin
-    SendData('只能推送文本消息.');
-    Exit;
+    // 发送协议头（描述）
+    LoadHead(FSender.Data);
+    FSender.SendBuffers;
   end;
-    
-  if (FComplete = False) or (FMsgSize > IO_BUFFER_SIZE - 30) then
+  procedure SendMainStream;
   begin
-    SendData('消息未完整接收或太长, 放弃.');
-    Exit;
+    // 发送主体数据流
+    {$IFDEF TRANSMIT_FILE}
+    // 设置主体数据流
+    FSocket.FTask.SetTask(FMain, FDataSize);
+    {$ELSE}
+    FSender.Send(FMain, FDataSize, False);  // 不关闭资源
+    {$ENDIF}
+  end;
+  procedure SendAttachmentStream;
+  begin
+    // 发送附件数据
+    {$IFDEF TRANSMIT_FILE}
+    // 设置附件数据流
+    if (FAction = atFileDownChunk) then
+      FSocket.FTask.SetTask(FAttachment, FAttachSize, FOffset, FOffsetEnd)
+    else
+      FSocket.FTask.SetTask(FAttachment, FAttachSize);
+    {$ELSE}
+    // 不关闭资源
+    if (FAction = atFileDownChunk) then
+      FSender.Send(FAttachment, FAttachSize, FOffset, FOffsetEnd, False)
+    else
+      FSender.Send(FAttachment, FAttachSize, False);
+    {$ENDIF}
+  end;
+begin
+  // 发送结果给客户端，不用请求，直接发送
+  //  附件流是 TIOCPDocument，还要用，不能释放
+  //   见：TIOCPSocket.HandleDataPack; TClientParams.InternalSend
+
+  // FSender.Socket、Owner 已经设置
+
+  try
+    // 1. 准备数据流
+    CreateStreams;
+
+    if (Error = False) then
+    begin
+      // 2. 发协议头
+      SendMsgHeader;
+
+      // 3. 主体数据（内存流）
+      if (FDataSize > 0) then
+        SendMainStream;
+
+      // 4. 发送附件数据
+      if (FAttachSize > 0) then
+        SendAttachmentStream;
+    end;
+  finally
+    {$IFDEF TRANSMIT_FILE}
+    FSocket.InterTransmit;
+    {$ELSE}
+    NilStreams(False);  // 5. 清空，暂不释放附件流
+    {$ENDIF}
   end;
 
-  // 清除掩码
-  FReceiver.ClearMark(FData, @FRecvBuf^.Overlapped);
-
-  if (FMsgType = mtJSON) then  // 清除 Owner, 0 表示服务端
-    ClearMsgOwner(FData, FRecvBuf^.Overlapped.InternalHigh);
-
-  if Assigned(Target) then  // 发给 Target
-  begin
-    Msg := TPushMessage.Create(FRecvBuf, False);
-    Msg.Add(Target);  // 加入 Target
-  end else  // 广播
-    Msg := TPushMessage.Create(FRecvBuf, True);
-
-  // 加入推送线程（必须发送一个消息给客户端）
-  if FServer.PushManager.AddWork(Msg) then
-    InternalPing  // Ping 客户端（延时，必须）
-  else
-    SendData('系统繁忙, 放弃.'); // 繁忙，放弃，Msg 已被释放
-
-end;
-
-procedure TWebSocket.PostEvent(IOKind: TIODataType);
-begin
-  // Empty
-end;
-
-procedure TWebSocket.SendData(const Msg: String);
-begin
-  // 未封装：发送文本
-  if (Msg <> '') then
-  begin
-    FSender.OpCode := ocText;
-    FSender.Send(System.AnsiToUtf8(Msg));
-  end;
-end;
-
-procedure TWebSocket.SendData(const Data: PAnsiChar; Size: Cardinal);
-var
-  Buf: PAnsiChar;
-begin
-  // 未封装：发送内存块数据（复制 Data）
-  if Assigned(Data) and (Size > 0) then
-  begin
-    GetMem(Buf, Size);
-    System.Move(Data^, Buf^, Size);
-    FSender.OpCode := ocBiary;
-    FSender.Send(Buf, Size);
-  end;
-end;
-
-procedure TWebSocket.SendData(Handle: THandle);
-begin
-  // 未封装：发送文件 handle（自动关闭）
-  if (Handle > 0) and (Handle <> INVALID_HANDLE_VALUE) then
-  begin
-    FSender.OpCode := ocBiary;
-    FSender.Send(Handle, GetFileSize64(Handle));
-  end;
-end;
-
-procedure TWebSocket.SendData(Stream: TStream);
-begin
-  // 未封装：发送流数据（自动释放）
-  if Assigned(Stream) then
-  begin
-    FSender.OpCode := ocBiary;
-    FSender.Send(Stream, Stream.Size, True);
-  end;
-end;
-
-procedure TWebSocket.SendDataVar(Data: Variant);
-begin
-  // 未封装：发送可变类型数据
-  if (VarIsNull(Data) = False) then
-  begin
-    FSender.OpCode := ocBiary;
-    FSender.SendVar(Data);
-  end;
-end;
-
-procedure TWebSocket.SendResult(UTF8CharSet: Boolean);
-begin
-  // 发送 FResult 给客户端（InIOCP-JSON）
-  FResult.FOwner := FJSON.Owner;
-  FResult.FUTF8CharSet := UTF8CharSet;
-  FResult.InternalSend(FSender, False);
-end;
-
-procedure TWebSocket.SetProps(AOpCode: TWSOpCode; AMsgType: TWSMsgType;
-                     AData: Pointer; AFrameSize: Int64; ARecvSize: Cardinal);
-begin
-  // 更新，见：TWSServerReceiver.InitResources
-  FMsgType := AMsgType;  // 数据类型
-  FOpCode := AOpCode;  // 操作
-  FMsgSize := 0;  // 消息长度
-  FData := AData; // 引用地址
-  FFrameSize := AFrameSize;  // 帧长度
-  FFrameRecvSize := ARecvSize;  // 收到帧长度
 end;
 
 { TIOCPSocket }
@@ -2132,6 +1905,234 @@ begin
     FStream.Write(Data^, DataLength);
 end;
 
+{ TWebSocket }
+
+procedure TWebSocket.ClearMsgOwner(Buf: PAnsiChar; Len: Integer);
+begin
+  // 修改消息的宿主
+  Inc(Buf, Length(INIOCP_JSON_FLAG));
+  if SearchInBuffer(Buf, Len, '"__MSG_OWNER":') then // 区分大小写
+    while (Buf^ <> AnsiChar(',')) do
+    begin
+      Buf^ := AnsiChar('0');
+      Inc(Buf);
+    end;
+end;
+
+procedure TWebSocket.ClearResources;
+begin
+  if Assigned(FReceiver) then
+    FReceiver.Clear;
+end;
+
+constructor TWebSocket.Create(APool: TIOCPSocketPool; ALinkNode: PLinkRec);
+begin
+  inherited;
+  FUseTransObj := False;  // 不用 TransmitFile
+  FJSON := TBaseJSON.Create(Self);
+  FResult := TResultJSON.Create(Self);
+  FResult.FServerMode := True;  // 服务器模式
+  FReceiver := TWSServerReceiver.Create(Self, FJSON);
+end;
+
+destructor TWebSocket.Destroy;
+begin
+  FJSON.Free;
+  FResult.Free;
+  FReceiver.Free;
+  inherited;
+end;
+
+procedure TWebSocket.ExecuteWork;
+begin
+  // 接收数据，执行任务
+
+  // 1. 接收数据
+  FTickCount := GetTickCount;
+
+  if FReceiver.Complete then  // 首数据包
+  begin
+    // 分析、接收数据
+    // 可能改变 FMsgType，见 FReceiver.UnMarkData
+    FMsgType := mtDefault;
+    FReceiver.Prepare(FRecvBuf^.Data.buf, FByteCount);
+    case FReceiver.OpCode of
+      ocClose: begin
+        InterCloseSocket(Self);  // 关闭，返回
+        Exit;
+      end;
+      ocPing, ocPong: begin
+        InternalRecv(True);  // 投放，返回
+        Exit;
+      end;
+    end;
+  end else
+  begin
+    // 接收后续数据包
+    FReceiver.Receive(FRecvBuf^.Data.buf, FByteCount);
+  end;
+
+  // 是否接收完成
+  FComplete := FReceiver.Complete;
+
+  // 2. 进入应用层
+  // 2.1 标准操作，每接收一次即进入
+  // 2.2 扩展的操作，是 JSON 消息，接收完毕才进入
+
+  try
+    if (FMsgType = mtDefault) or FComplete then
+      FWorker.WSExecute(Self);
+  finally
+    if FComplete then   // 接收完毕
+    begin
+      case FMsgType of
+        mtJSON: begin   // 扩展的 JSON
+          FJSON.Clear;  // 不清 Attachment
+          FResult.Clear;
+          FReceiver.Clear;
+        end;
+        mtAttachment: begin  // 扩展的附件流
+          FJSON.Close;  // 关闭附件流
+          FResult.Clear;
+          FReceiver.Clear;
+        end;
+      end;
+      // ping 客户端
+      InternalPing;  
+    end;
+
+    // 继续接收
+    InternalRecv(FComplete);
+  end;
+
+end;
+
+procedure TWebSocket.InternalPing;
+begin
+  // Ping 客户端，等新的信息缓存接收完成
+  MakeFrameHeader(FSender.Data, ocPing);
+  FSender.SendBuffers;
+end;
+
+procedure TWebSocket.InterPush(Target: TWebSocket);
+var
+  Msg: TPushMessage;
+begin
+  // 发收到的消息发给 Target 或广播
+  //   提交到推送线程，不知道何时发出、是否成功。
+
+  if (FOpCode <> ocText) then
+  begin
+    SendData('只能推送文本消息.');
+    Exit;
+  end;
+    
+  if (FComplete = False) or (FMsgSize > IO_BUFFER_SIZE - 30) then
+  begin
+    SendData('消息未完整接收或太长, 放弃.');
+    Exit;
+  end;
+
+  // 清除掩码
+  FReceiver.ClearMark(FData, @FRecvBuf^.Overlapped);
+
+  if (FMsgType = mtJSON) then  // 清除 Owner, 0 表示服务端
+    ClearMsgOwner(FData, FRecvBuf^.Overlapped.InternalHigh);
+
+  if Assigned(Target) then  // 发给 Target
+  begin
+    Msg := TPushMessage.Create(FRecvBuf, False);
+    Msg.Add(Target);  // 加入 Target
+  end else  // 广播
+    Msg := TPushMessage.Create(FRecvBuf, True);
+
+  // 加入推送线程（必须发送一个消息给客户端）
+  if FServer.PushManager.AddWork(Msg) then
+    InternalPing  // Ping 客户端（延时，必须）
+  else
+    SendData('系统繁忙, 放弃.'); // 繁忙，放弃，Msg 已被释放
+
+end;
+
+procedure TWebSocket.PostEvent(IOKind: TIODataType);
+begin
+  // Empty
+end;
+
+procedure TWebSocket.SendData(const Msg: String);
+begin
+  // 未封装：发送文本
+  if (Msg <> '') then
+  begin
+    FSender.OpCode := ocText;
+    FSender.Send(System.AnsiToUtf8(Msg));
+  end;
+end;
+
+procedure TWebSocket.SendData(const Data: PAnsiChar; Size: Cardinal);
+var
+  Buf: PAnsiChar;
+begin
+  // 未封装：发送内存块数据（复制 Data）
+  if Assigned(Data) and (Size > 0) then
+  begin
+    GetMem(Buf, Size);
+    System.Move(Data^, Buf^, Size);
+    FSender.OpCode := ocBiary;
+    FSender.Send(Buf, Size);
+  end;
+end;
+
+procedure TWebSocket.SendData(Handle: THandle);
+begin
+  // 未封装：发送文件 handle（自动关闭）
+  if (Handle > 0) and (Handle <> INVALID_HANDLE_VALUE) then
+  begin
+    FSender.OpCode := ocBiary;
+    FSender.Send(Handle, GetFileSize64(Handle));
+  end;
+end;
+
+procedure TWebSocket.SendData(Stream: TStream);
+begin
+  // 未封装：发送流数据（自动释放）
+  if Assigned(Stream) then
+  begin
+    FSender.OpCode := ocBiary;
+    FSender.Send(Stream, Stream.Size, True);
+  end;
+end;
+
+procedure TWebSocket.SendDataVar(Data: Variant);
+begin
+  // 未封装：发送可变类型数据
+  if (VarIsNull(Data) = False) then
+  begin
+    FSender.OpCode := ocBiary;
+    FSender.SendVar(Data);
+  end;
+end;
+
+procedure TWebSocket.SendResult(UTF8CharSet: Boolean);
+begin
+  // 发送 FResult 给客户端（InIOCP-JSON）
+  FResult.FOwner := FJSON.Owner;
+  FResult.FUTF8CharSet := UTF8CharSet;
+  FResult.InternalSend(FSender, False);
+end;
+
+procedure TWebSocket.SetProps(AOpCode: TWSOpCode; AMsgType: TWSMsgType;
+                     AData: Pointer; AFrameSize: Int64; ARecvSize: Cardinal);
+begin
+  // 更新，见：TWSServerReceiver.InitResources
+  FMsgType := AMsgType;  // 数据类型
+  FOpCode := AOpCode;  // 操作
+  FMsgSize := 0;  // 消息长度
+  FData := AData; // 引用地址
+  FFrameSize := AFrameSize;  // 帧长度
+  FFrameRecvSize := ARecvSize;  // 收到帧长度
+end;
+
 { TSocketBroker }
 
 procedure TSocketBroker.AssociateInner(InnerBroker: TSocketBroker);
@@ -2158,7 +2159,7 @@ end;
 
 function TSocketBroker.ChangeConnection(const ABrokerId, AServer: AnsiString; APort: Integer): Boolean;
 begin
-  // 检查关联是否已经改变
+  // 检查关联目的是否已经改变
   if (FIOCPBroker.ProxyType = ptOuter) then
     Result := (ABrokerId <> FBrokerId)  // 反向代理改变
   else
@@ -2170,10 +2171,12 @@ end;
 
 function TSocketBroker.CheckInnerSocket: Boolean;
 begin
-  // ++外部代理模式
+  // ++外部代理模式，两种连接：
+  // 1、外部客户端，数据不带 InIOCP_INNER_SOCKET
+  // 2、内部的反向代理客户端，数据带 InIOCP_INNER_SOCKET:InnerBrokerId
   if (PInIOCPInnerSocket(FRecvBuf^.Data.buf)^ = InIOCP_INNER_SOCKET) then
   begin
-    // 这是内部的反向代理连接，保存到列表
+    // 这是内部的反向代理连接，保存到列表，在 TInIOCPBroker.BindBroker 配对
     SetString(FBrokerId, FRecvBuf^.Data.buf + Length(InIOCP_INNER_SOCKET) + 1,
                          Integer(FByteCount) - Length(InIOCP_INNER_SOCKET) - 1);
     TInIOCPBrokerX(FIOCPBroker).AddConnection(Self, FBrokerId);
@@ -2218,6 +2221,7 @@ begin
     FDual.FToSocket := FSocket;
 
     FDual.FBrokerId := FBrokerId;
+    FDual.FCmdConnect := False;
     FDual.FTargetPort := APort;
     FDual.FTargetHost := AServer;
     FDual.FOnBind := nil;  // 删除
@@ -2237,15 +2241,15 @@ begin
     FDual := nil;
   end;
 
-  // 反向代理，向外补发连接
-  if FIOCPBroker.ReverseMode then
+  if FIOCPBroker.ReverseMode then  // 反向代理，向外补发连接
   begin
-    FSocketType := stDefault;  // 改变，关闭时不补充连接
+    FSocketType := stDefault;  // 改变（关闭时不补充连接）
     TInIOCPBrokerX(FIOCPBroker).ConnectOuter;
   end;
 
-  if (FSocketType = stWebSocket) or (FIOCPBroker.Protocol = tpNone) then
-    FOnBind := nil;  // 删除绑定事件，以后不再绑定！
+  // 删除绑定事件，以后不再绑定！
+  if (FSocketType = stWebSocket) or (FIOCPBroker.Protocol >= tpNone) then
+    FOnBind := nil;
 
 end;
 
@@ -2258,7 +2262,8 @@ begin
   if (FConnected = False) then
     Exit;
 
-  // 要合理设置 TInIOCPBroker.ProxyType 
+  // 要合理设置 TInIOCPBroker.ProxyType
+  
   case FIOCPBroker.ProxyType of
     ptDefault:
       if (FAction > 0) then  // 见：SendInnerFlag
@@ -2268,14 +2273,14 @@ begin
         Exit;
       end;
     ptOuter:  // 外部代理
-      if not Assigned(FDual) and CheckInnerSocket then  // 检查连接类型
+      if not Assigned(FDual) and CheckInnerSocket then  // 是内部反向代理的连接
       begin
         InternalRecv(True);  // 先投放
         Exit;
       end;
   end;
 
-  if Assigned(FOnBind) then
+  if Assigned(FOnBind) then  // 开始时存在
     try
       FOnBind(Self, FRecvBuf^.Data.buf, FByteCount)  // 绑定、关联
     finally
@@ -2310,10 +2315,17 @@ procedure TSocketBroker.ForwardData;
       FDual.InterCloseSocket(FDual);
   end;
 begin
-  // 复制、转发数据（不能简单互换数据块，否则大并发时 995 异常）:
+  // 复制、转发数据（不能简单互换数据块，否则大并发时 995 异常）
   try
-    FSender.Socket := FToSocket;  // 改变（原来为自己的）
-    TServerTaskSender(FSender).CopySend(FRecvBuf);
+    if (FErrorCode = 0) then
+      if FCmdConnect then  // Http代理: Connect 请求，响应
+      begin
+        FCmdConnect := False;
+        FSender.Send(HTTP_PROXY_RESPONE);
+      end else begin
+        FSender.Socket := FToSocket;  // 改变（原来为自己的）
+        TServerTaskSender(FSender).CopySend(FRecvBuf);
+      end;
   finally
     if (FErrorCode = 0) then
     begin
@@ -2327,19 +2339,31 @@ begin
   end;
 end;
 
-procedure TSocketBroker.HttpConnectHost(const AServer: AnsiString; APort: Integer);
-begin
-  // Http 协议：连接到请求的主机 HOST，没有时连接到参数指定的
-  if (FTargetHost <> '') and (FTargetPort > 0) then
-    CreateBroker(FTargetHost, FTargetPort)
-  else
-  if (AServer <> '') and (APort > 0) then  // 用参数指定的
-    CreateBroker(AServer, APort)
-  else
-    InterCloseSocket(Self);  // 关闭
-end;
+procedure TSocketBroker.HttpBindOuter(Connection: TSocketBroker; const Data: PAnsiChar; DataSize: Cardinal);
+  procedure GetConnectHost(var p: PAnsiChar);
+  var
+    pb: PAnsiChar;
+    i: Integer;
+  begin
+    // 提取主机地址：CONNECT xxx:443 HTTP/1.1
+    Delete(FTargetHost, 1, Length(FTargetHost));
 
-procedure TSocketBroker.HttpRequestDecode;
+    pb := nil;
+    Inc(p, 7);  // connect
+
+    for i := 1 to FByteCount do
+    begin
+      if (p^ = #32) then
+        if (pb = nil) then  // 地址开始
+          pb := p
+        else begin  // 地址结束，简化判断版本
+          SetString(FTargetHost, pb, p - pb);
+          FTargetHost := Trim(FTargetHost);
+          Break;
+        end;
+      Inc(p);
+    end;
+  end;
   procedure GetHttpHost(var p: PAnsiChar);
   var
     pb: PAnsiChar;
@@ -2355,27 +2379,6 @@ procedure TSocketBroker.HttpRequestDecode;
         #13: begin
           SetString(FTargetHost, pb, p - pb);
           FTargetHost := Trim(FTargetHost);
-          Exit;
-        end;
-      end;
-      Inc(p);
-    until (p^ = #10);
-  end;
-  procedure GetContentLength(var p: PAnsiChar);
-  var
-    S: AnsiString;
-    pb: PAnsiChar;
-  begin
-    // 提取内容长度：CONTENT-LENGTH: 1234
-    pb := nil;
-    Inc(p, 14);
-    repeat
-      case p^ of
-        ':':
-          pb := p + 1;
-        #13: begin
-          SetString(S, pb, p - pb);
-          TryStrToInt(S, FContentLength);
           Exit;
         end;
       end;
@@ -2417,13 +2420,13 @@ procedure TSocketBroker.HttpRequestDecode;
       case FTargetHost[i] of
         ':':
           j := i;
-        '@':
+        '@':  // HTTP 反向代理扩展，后面为局域网/分公司标志
           k := i;
       end;
 
     if (k > 0) then  // 反向代理标志
     begin
-      if (FIOCPBroker.ProxyType = ptOuter) then  // 外部才用
+      if (FIOCPBroker.ProxyType = ptOuter) then  // 外部代理才用
         FBrokerId := Copy(FTargetHost, k + 1, 99);
       Delete(FTargetHost, k, 99);
     end;
@@ -2435,72 +2438,96 @@ procedure TSocketBroker.HttpRequestDecode;
     end;
     
   end;
+  procedure HttpRequestDecode;
+  var
+    iState: Integer;
+    pE, pb, p: PAnsiChar;
+  begin
+    // Http 协议：提取请求信息：Host、Upgrade
+    p := FRecvBuf^.Data.buf;  // 开始位置
+    pE := PAnsiChar(p + FByteCount);  // 结束位置
 
-var
-  iState: Integer;
-  pE, pb, p: PAnsiChar;
-begin
-  // Http 协议：提取请求信息：Host、Content-Length、Upgrade
-
-  FContentLength := 0;  // 总长
-  FReceiveSize := 0;    // 收到的长度
-  iState := 0;          // 信息状态
-
-  p := FRecvBuf^.Data.buf;  // 开始位置
-  pE := PAnsiChar(p + FByteCount);  // 结束位置
-  pb := nil;
-  
-  Inc(p, 12);
-
-  repeat
-    case p^ of
-      #10:  // 分行符
-        pb := p + 1;
-
-      #13:  // 回车符
-        if (pb <> nil) then
-          if (p = pb) then  // 出现连续的回车换行，报头结束
-          begin
-            Inc(p, 2);
-            if (p < pE) then  // 后面带数据，POST
-              FReceiveSize := pE - p;
-            Break;
-          end else
-          if (p - pb >= 15) then
-          begin
-            if http_utils.CompareBuffer(pb, 'HOST', True) then
-            begin
-              iState := iState xor 1;
-              GetHttpHost(pb);
-              ExtractHostPort;
-            end else
-            if http_utils.CompareBuffer(pb, 'CONTENT-LENGTH', True) then
-            begin
-              iState := iState xor 2;
-              GetContentLength(pb);
-            end else
-            if http_utils.CompareBuffer(pb, 'UPGRADE', True) then  // WebSocket
-            begin
-              iState := iState xor 2;
-              GetUpgradeType(pb);
-            end;
-          end;
+    // 1、HTTP代理：Connect 命令，代理=443
+    if http_utils.CompareBuffer(p, 'CONNECT', True) then
+    begin
+      FCmdConnect := True;
+      GetConnectHost(p);  // p 改变
+      ExtractHostPort;
+      Exit;
     end;
 
-    Inc(p);
-  until (p >= pE) or (iState = 3);
+    // 2、其他 HTTP 命令
+    
+    iState := 0;  // 信息状态
+    FCmdConnect := False;
+    FTargetPort := 80;  // 默认端口，代理=443
+    pb := nil;
 
-  // 用默认主机
-  if (FIOCPBroker.ProxyType = ptDefault) then
-  begin
-    if (FTargetHost = '') then
-      FTargetHost := FIOCPBroker.DefaultInnerAddr;
-    if (FTargetPort = 0) then
-      FTargetPort := FIOCPBroker.DefaultInnerPort;
+    Inc(p, 12);
+
+    repeat
+      case p^ of
+        #10:  // 分行符
+          pb := p + 1;
+
+        #13:  // 回车符
+          if (pb <> nil) then
+            if (p = pb) then  // 出现连续的回车换行，报头结束
+            begin
+              Inc(p, 2);
+              Break;
+            end else
+            if (p - pb >= 15) then
+            begin
+              if http_utils.CompareBuffer(pb, 'HOST', True) then
+              begin
+                Inc(iState);
+                GetHttpHost(pb);
+                ExtractHostPort;
+              end else
+              if http_utils.CompareBuffer(pb, 'UPGRADE', True) then  // WebSocket
+              begin
+                Inc(iState, 2);
+                GetUpgradeType(pb);
+              end;
+            end;
+      end;
+
+      Inc(p);
+    until (p >= pE) or (iState = 3);
+
   end;
+  procedure HttpConnectHost(const AServer: AnsiString; APort: Integer);
+  begin
+    // Http 协议：连接到请求的主机 HOST，没有时连接到参数指定的
+    if (FTargetHost <> '') and (FTargetPort > 0) then
+      CreateBroker(FTargetHost, FTargetPort)
+    else
+    if (AServer <> '') and (APort > 0) then  // 用参数指定的
+      CreateBroker(AServer, APort)
+    else
+      InterCloseSocket(Self);  // 关闭
+  end;
+var
+  Accept: Boolean;
+begin
+  // Http 协议：检查 Connect 命令和其他命令的 Host
 
-  // 是否传输完成
-  FComplete := FReceiveSize >= FContentLength;
+  // 提取 Host 信息
+  HttpRequestDecode;
+
+  Accept := True;
+  if Assigned(FIOCPBroker.OnAccept) then  // 是否允许连接
+    FIOCPBroker.OnAccept(Self, FTargetHost, FTargetPort, Accept);
+
+  if Accept then
+    if (FIOCPBroker.ProxyType = ptDefault) then  // 默认代理：新建连接，关联
+      HttpConnectHost(FIOCPBroker.InnerServer.ServerAddr,
+                      FIOCPBroker.InnerServer.ServerPort)
+    else  // 内部代理：从内部连接池选取关联对象
+    if not Assigned(FDual) or
+      FDual.ChangeConnection(FBrokerId, FTargetHost, FTargetPort) then
+      TInIOCPBrokerX(FIOCPBroker).BindInnerBroker(Connection, Data, DataSize);
 
 end;
 
@@ -2510,19 +2537,18 @@ const
   SOCKET_STATE_BUSY  = 1;  // 在用
   SOCKET_STATE_TRANS = 2;  // TransmitFile 在用 
 begin
-  // 覆盖基类方法，没有推送模式
+  // 覆盖基类方法，没有推送模式，要保证自身和 Dual 同时空闲 
   case iocp_api.InterlockedCompareExchange(FState, 1, 0) of  // 返回原值
 
-    SOCKET_STATE_IDLE: begin
-      if not Assigned(FDual) or
+    SOCKET_STATE_IDLE:
+      if not Assigned(FDual) or  // 无 DUAL 或同时空闲
         (iocp_api.InterlockedCompareExchange(FDual.FState, 1, 0) = SOCKET_STATE_IDLE) then
         Result := SOCKET_LOCK_OK
-      else
+      else begin
         Result := SOCKET_LOCK_FAIL;
-      if (Result = SOCKET_LOCK_FAIL) then // 放弃！
-        if (windows.InterlockedDecrement(FState) <> 0) then
+        if (windows.InterlockedDecrement(FState) <> 0) then  // 异常了，放弃！
           InterCloseSocket(Self);
-    end;
+      end;
 
     SOCKET_STATE_BUSY,
     SOCKET_STATE_TRANS:
@@ -2533,25 +2559,6 @@ begin
   end;
 end;
 
-procedure TSocketBroker.HttpBindOuter(Connection: TSocketBroker; const Data: PAnsiChar; DataSize: Cardinal);
-begin
-  // Http 协议：外部客户端传来数据，关联内部连接
-  if FComplete then  // 新的请求
-  begin
-    HttpRequestDecode;  // 提取信息
-    if (FIOCPBroker.ProxyType = ptDefault) then  // 新建连接，关联
-      HttpConnectHost(FIOCPBroker.InnerServer.ServerAddr,
-                      FIOCPBroker.InnerServer.ServerPort)
-    else  // 从内部连接池选取关联对象
-    if not Assigned(FDual) or FDual.ChangeConnection(FBrokerId, FTargetHost, FTargetPort) then
-      TInIOCPBrokerX(FIOCPBroker).BindBroker(Connection, Data, DataSize);
-  end else
-  begin  // 收到的当前请求的实体内容+
-    Inc(FReceiveSize, FByteCount);
-    FComplete := FReceiveSize >= FContentLength;
-  end;
-end;
-
 procedure TSocketBroker.PostEvent(IOKind: TIODataType);
 begin
   InterCloseSocket(Self);  // 直接关闭，见 TInIOCPServer.AcceptClient
@@ -2559,10 +2566,9 @@ end;
 
 procedure TSocketBroker.SendInnerFlag;
 begin
-  // 向外部代理发送连接标志
+  // 向外部代理发送连接标志，在 ExecSocketAction 执行
   FAction := 1;  // 自身操作
-  FState := 0;
-  FRecvBuf^.RefCount := 1;
+  FState := 0;   // 解锁
   FServer.BusiWorkMgr.AddWork(Self);
 end;
 
@@ -2589,13 +2595,14 @@ begin
   if (FIOCPBroker.ProxyType = ptOuter) then
     FBrokerId := 'DEFAULT';
 
-  if (FIOCPBroker.Protocol = tpHTTP) then  // http 协议，直接内部绑定、解析
-    FOnBind := HttpBindOuter
+  if (FIOCPBroker.Protocol = tpHTTP) then  
+    FOnBind := HttpBindOuter  // http 协议，直接内部绑定、解析
   else
   if (FIOCPBroker.ProxyType = ptDefault) then
-    FOnBind := FIOCPBroker.OnBind  // 绑定关联事件
-  else // 外部代理，自动绑定
-    FOnBind := TInIOCPBrokerX(FIOCPBroker).BindBroker;
+    FOnBind := FIOCPBroker.OnBind  // 绑定组件事件
+  else // 外部代理，绑定组件方法
+    FOnBind := TInIOCPBrokerX(FIOCPBroker).BindInnerBroker;
+    
 end;
 
 end.

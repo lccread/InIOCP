@@ -54,7 +54,7 @@ function getSvrTime()
 
 function getTableData()
 {
-	loadXMLDoc("/ajax/query_xzqh.pas?SQL=Select_tbl_xzqh",function()
+	loadXMLDoc("/ajax/query_xzqh.pas?code=110112&SQL=Select_tbl_xzqh2",function()
 	{
 		if (xmlhttp.readyState==4 && xmlhttp.status==200)	
 			if (xmlhttp.responseText=="INVALID_SESSION")
